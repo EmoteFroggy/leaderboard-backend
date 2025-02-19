@@ -21,13 +21,22 @@ app.get("/leaderboard", (req, res) => {
 
 // POST endpoint to submit a score
 app.post("/submitScore", (req, res) => {
-  const { name, score } = req.body;
-  if (!name || typeof score !== "number") {
-    return res.status(400).json({ error: "Invalid payload." });
-  }
-  leaderboard.push({ name, score });
-  return res.status(201).json({ success: true });
-});
+    const { name, score } = req.body;
+    if (!name || typeof score !== "number") {
+      return res.status(400).json({ error: "Invalid payload." });
+    }
+    // Check if an entry with the same name exists
+    const existingIndex = leaderboard.findIndex(entry => entry.name === name);
+    if (existingIndex !== -1) {
+      // If new score is higher than the existing one, update it; otherwise do nothing.
+      if (score > leaderboard[existingIndex].score) {
+        leaderboard[existingIndex].score = score;
+      }
+    } else {
+      leaderboard.push({ name, score });
+    }
+    return res.status(201).json({ success: true });
+  });
 
 // Start the server
 app.listen(PORT, () => {
