@@ -25,17 +25,20 @@ app.post("/submitScore", (req, res) => {
     if (!name || typeof score !== "number") {
       return res.status(400).json({ error: "Invalid payload." });
     }
-    // Check if an entry with the same name exists
+    // Look for an existing entry for this username
     const existingIndex = leaderboard.findIndex(entry => entry.name === name);
     if (existingIndex !== -1) {
-      // If new score is higher than the existing one, update it; otherwise do nothing.
+      // If the new score is lower than or equal to the current score, throw an error.
       if (score > leaderboard[existingIndex].score) {
         leaderboard[existingIndex].score = score;
+        return res.status(201).json({ success: true });
+      } else {
+        return res.status(400).json({ error: "Submitted score is lower than or equal to current score." });
       }
     } else {
       leaderboard.push({ name, score });
+      return res.status(201).json({ success: true });
     }
-    return res.status(201).json({ success: true });
   });
 
 // Start the server
